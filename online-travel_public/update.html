@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Travel Records</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f6fa;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #ccc;
+        }
+
+        h1 {
+            text-align: center;
+            color: #123456;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #123456;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #087e8b;
+        }
+
+        #editForm {
+            margin-top: 20px;
+        }
+
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        a {
+            color: #087e8b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Update Travel Records</h1>
+
+    <a href="index.html">Home</a>
+
+    <label>Select Table:</label>
+
+    <select id="table">
+        <option value="customers">Customers</option>
+        <option value="destinations">Destinations</option>
+        <option value="package">Packages</option>
+        <option value="bookings">Bookings</option>
+    </select>
+
+    <label>Enter Record ID:</label>
+
+    <input type="number" id="id" placeholder="Enter ID">
+
+    <button type="button" onclick="loadRecord()">
+        Load Record
+    </button>
+
+    <form id="editForm" style="display:none;">
+        <h3>Edit Record Details</h3>
+
+        <div id="fields"></div>
+
+        <button type="submit">Update Record</button>
+    </form>
+
+    <div id="message"></div>
+
+</div>
+
+<script>
+
+let currentTable = "";
+let currentId = "";
+
+async function loadRecord() {
+
+    currentTable = document.getElementById("table").value;
+    currentId = document.getElementById("id").value;
+
+    const message = document.getElementById("message");
+    const form = document.getElementById("editForm");
+    const fields = document.getElementById("fields");
+
+    if (currentId === "") {
+        alert("Please enter Record ID");
+        return;
+    }
+
+    message.innerHTML = "Loading record...";
+    form.style.display = "none";
+    fields.innerHTML = "";
+
+    try {
+
+        const response = await fetch(
+            "/" + currentTable + "/" + currentId
+        );
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        let data = await response.json();
+
+        if (Array.isArray(data)) {
+            data = data[0];
+        }
+
+        if (!data) {
+            throw new Error("Record not found");
+        }
+
+        // Create input fields dynamically
+        for (let key in data) {
+
+            const label = document.createElement("label");
+            label.textContent = key;
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.name = key;
+            input.value = data[key] ?? "";
+
+            fields.appendChild(label);
+            fields.appendChild(input);
+
+        }
+
+        form.style.display = "block";
+        message.innerHTML = "Record loaded successfully!";
+
+    }
+    catch (error) {
+
+        message.innerHTML =
+            "<span style='color:red'>" +
+            error.message + "</span>";
+
+    }
+}
+
+
+// Update record
+document.getElementById("editForm").addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const inputs = document.querySelectorAll(
+            "#fields input"
+        );
+
+        const updatedData = {};
+
+        inputs.forEach(input => {
+            updatedData[input.name] = input.value;
+        });
+
+        try {
+
+            const response = await fetch(
+                "/" + currentTable + "/" + currentId,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(updatedData)
+                }
+            );
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                throw new Error(result);
+            }
+
+            document.getElementById("message").innerHTML =
+                "<span style='color:green'>" +
+                result + "</span>";
+
+        }
+        catch (error) {
+
+            document.getElementById("message").innerHTML =
+                "<span style='color:red'>" +
+                error.message + "</span>";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

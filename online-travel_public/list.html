@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Travel Records</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f6fa;
+            padding: 25px;
+        }
+        h1 { color: #123456; text-align: center; }
+        select, button {
+            padding: 10px;
+            margin: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
+        }
+        th { background: #123456; color: white; }
+    </style>
+</head>
+<body>
+
+<h1>Travel Management Records</h1>
+
+<a href="index.html">Home</a>
+
+<br><br>
+
+<label>Select Table:</label>
+<select id="table">
+    <option value="customers">Customers</option>
+    <option value="destinations">Destinations</option>
+    <option value="package">Packages</option>
+    <option value="bookings">Bookings</option>
+</select>
+
+<button onclick="loadData()">View Records</button>
+
+<table id="result">
+    <thead></thead>
+    <tbody></tbody>
+</table>
+
+<script>
+async function loadData() {
+    const table = document.getElementById("table").value;
+
+    try {
+        const response = await fetch("/" + table);
+        if (!response.ok) throw new Error(await response.text());
+
+        const data = await response.json();
+
+        const thead = document.querySelector("#result thead");
+        const tbody = document.querySelector("#result tbody");
+
+        thead.innerHTML = "";
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = "<tr><td>No records found</td></tr>";
+            return;
+        }
+
+        const columns = Object.keys(data[0]);
+
+        thead.innerHTML = "<tr>" +
+            columns.map(col => "<th>" + col + "</th>").join("") +
+            "</tr>";
+
+        data.forEach(row => {
+            const tr = document.createElement("tr");
+
+            columns.forEach(col => {
+                const td = document.createElement("td");
+                td.textContent = row[col] ?? "";
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
+}
+</script>
+
+</body>
+</html>

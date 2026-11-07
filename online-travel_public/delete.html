@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Travel Records</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f6fa;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: 60px auto;
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #ccc;
+        }
+
+        h1 {
+            text-align: center;
+            color: #c0392b;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #c0392b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #922b21;
+        }
+
+        #message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        a {
+            color: #087e8b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Delete Travel Records</h1>
+
+    <a href="index.html">Home</a>
+
+    <label>Select Table:</label>
+
+    <select id="table">
+        <option value="customers">Customers</option>
+        <option value="destinations">Destinations</option>
+        <option value="package">Packages</option>
+        <option value="bookings">Bookings</option>
+    </select>
+
+    <label>Enter Record ID:</label>
+
+    <input type="number" id="id" placeholder="Enter ID">
+
+    <button onclick="deleteRecord()">Delete Record</button>
+
+    <div id="message"></div>
+
+</div>
+
+<script>
+
+async function deleteRecord() {
+
+    const table = document.getElementById("table").value;
+    const id = document.getElementById("id").value;
+    const message = document.getElementById("message");
+
+    if (id === "") {
+        alert("Please enter Record ID");
+        return;
+    }
+
+    const confirmDelete = confirm(
+        "Are you sure you want to delete this record?"
+    );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    message.innerHTML = "Deleting...";
+
+    try {
+
+        const response = await fetch(
+            "/" + table + "/" + id,
+            {
+                method: "DELETE"
+            }
+        );
+
+        const result = await response.text();
+
+        if (!response.ok) {
+            throw new Error(result);
+        }
+
+        message.innerHTML =
+            "<span style='color:green'>" +
+            result + "</span>";
+
+        document.getElementById("id").value = "";
+
+    }
+    catch (error) {
+
+        message.innerHTML =
+            "<span style='color:red'>" +
+            error.message + "</span>";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

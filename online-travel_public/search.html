@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Travel Records</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f6fa;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px #ccc;
+        }
+
+        h1 {
+            text-align: center;
+            color: #123456;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #123456;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #087e8b;
+        }
+
+        #result {
+            margin-top: 20px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        .record {
+            background: #f2f6fa;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+
+        a {
+            color: #087e8b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Search Travel Records</h1>
+
+    <a href="index.html">Home</a>
+
+    <br><br>
+
+    <label>Select Table:</label>
+
+    <select id="table">
+        <option value="customers">Customers</option>
+        <option value="destinations">Destinations</option>
+        <option value="package">Packages</option>
+        <option value="bookings">Bookings</option>
+    </select>
+
+    <label>Enter Record ID:</label>
+
+    <input type="number" id="id" placeholder="Enter ID">
+
+    <button onclick="searchRecord()">Search Record</button>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+
+async function searchRecord() {
+
+    const table = document.getElementById("table").value;
+    const id = document.getElementById("id").value;
+    const result = document.getElementById("result");
+
+    if (id === "") {
+        alert("Please enter an ID");
+        return;
+    }
+
+    result.innerHTML = "Searching...";
+
+    try {
+
+        const response = await fetch("/" + table + "/" + id);
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        let data = await response.json();
+
+        // Handle array response
+        if (Array.isArray(data)) {
+            data = data[0];
+        }
+
+        if (!data) {
+            result.innerHTML = "<h3>Record not found!</h3>";
+            return;
+        }
+
+        let output = "<h3>Record Found</h3>";
+        output += "<div class='record'>";
+
+        for (let key in data) {
+
+            output += "<p><b>" + key + ":</b> " +
+                (data[key] ?? "") + "</p>";
+
+        }
+
+        output += "</div>";
+
+        result.innerHTML = output;
+
+    }
+    catch (error) {
+
+        result.innerHTML =
+            "<p style='color:red'>Error: " +
+            error.message + "</p>";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

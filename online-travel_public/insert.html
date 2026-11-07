@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Insert Records | VARSHINI WanderWorld</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #eaf1f3;
+        }
+
+        header {
+            background: #123b49;
+            color: white;
+            padding: 22px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            color: #48d1cc;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1050px;
+            margin: 45px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px #0002;
+        }
+
+        .image {
+            width: 40%;
+            background: linear-gradient(#123b4955, #123b4955),
+            url("https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900")
+            center/cover;
+            color: white;
+            display: flex;
+            align-items: end;
+            padding: 30px;
+        }
+
+        .form-section {
+            width: 60%;
+            padding: 35px;
+        }
+
+        h1 {
+            color: #123b49;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            margin: 9px 0;
+            border: 1px solid #ccd5d8;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 15px;
+            background: #078b8b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #056c70;
+        }
+
+        @media(max-width: 700px) {
+            .container {
+                flex-direction: column;
+                margin: 20px;
+            }
+
+            .image, .form-section {
+                width: 100%;
+            }
+
+            .image {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2> VARSHINI WANDERWORLD.</h2>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="list.html">View Records</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <div class="image">
+        <div>
+            <h2>Start Your Journey!</h2>
+            <p>Every great adventure begins with a booking.</p>
+        </div>
+    </div>
+
+    <div class="form-section">
+
+        <h1>Insert New Record</h1>
+        <p>Add information to your travel management system.</p>
+
+        <select id="table" onchange="createForm()">
+            <option value="">Select Table</option>
+            <option value="customers">Customers</option>
+            <option value="destinations">Destinations</option>
+            <option value="package">Packages</option>
+            <option value="bookings">Bookings</option>
+        </select>
+
+        <form id="myForm"></form>
+
+        <p id="message"></p>
+
+    </div>
+
+</div>
+
+<script>
+
+const fields = {
+
+    customers: ["customers_id", "name", "email", "phone", "password"],
+
+    destinations: ["destination_id", "destination_name", "location", "description"],
+
+    package: ["package_id", "destination_id", "package_name", "duration", "price", "available_slots"],
+
+    bookings: ["booking_id", "customer_id", "package_id", "travel_date", "persons", "total_amount", "status"]
+
+};
+
+function createForm() {
+
+    let table = document.getElementById("table").value;
+    let form = document.getElementById("myForm");
+
+    form.innerHTML = "";
+
+    if (!table) return;
+
+    fields[table].forEach(field => {
+
+        let type = "text";
+
+        if (field === "email") type = "email";
+        if (field === "password") type = "password";
+        if (field === "travel_date") type = "date";
+        if (["duration", "price", "available_slots", "persons", "total_amount",
+             "customers_id", "destination_id", "package_id", "booking_id"].includes(field)) {
+            type = "number";
+        }
+
+        form.innerHTML += `
+            <input type="${type}" id="${field}"
+            placeholder="Enter ${field.replaceAll("_", " ")}" required>
+        `;
+
+    });
+
+    form.innerHTML += `<button type="submit">Insert Record</button>`;
+
+}
+
+document.getElementById("myForm").addEventListener("submit", function(e) {
+
+    e.preventDefault();
+
+    let table = document.getElementById("table").value;
+    let data = {};
+
+    fields[table].forEach(field => {
+        data[field] = document.getElementById(field).value;
+    });
+
+    fetch("/" + table, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+
+    .then(res => res.text())
+    .then(msg => {
+
+        document.getElementById("message").innerText = msg;
+
+        this.reset();
+
+    })
+
+    .catch(err => {
+        document.getElementById("message").innerText = "Error inserting record";
+    });
+
+});
+
+</script>
+
+</body>
+</html>
